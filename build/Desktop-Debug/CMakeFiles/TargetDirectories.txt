@@ -1,0 +1,9 @@
+/home/roma/Documents/453503/SEM_2/LR_2/Task_1/build/Desktop-Debug/CMakeFiles/Task_1.dir
+/home/roma/Documents/453503/SEM_2/LR_2/Task_1/build/Desktop-Debug/CMakeFiles/edit_cache.dir
+/home/roma/Documents/453503/SEM_2/LR_2/Task_1/build/Desktop-Debug/CMakeFiles/rebuild_cache.dir
+/home/roma/Documents/453503/SEM_2/LR_2/Task_1/build/Desktop-Debug/CMakeFiles/list_install_components.dir
+/home/roma/Documents/453503/SEM_2/LR_2/Task_1/build/Desktop-Debug/CMakeFiles/install.dir
+/home/roma/Documents/453503/SEM_2/LR_2/Task_1/build/Desktop-Debug/CMakeFiles/install/local.dir
+/home/roma/Documents/453503/SEM_2/LR_2/Task_1/build/Desktop-Debug/CMakeFiles/install/strip.dir
+/home/roma/Documents/453503/SEM_2/LR_2/Task_1/build/Desktop-Debug/CMakeFiles/Task_1_autogen_timestamp_deps.dir
+/home/roma/Documents/453503/SEM_2/LR_2/Task_1/build/Desktop-Debug/CMakeFiles/Task_1_autogen.dir
