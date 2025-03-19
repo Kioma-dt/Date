@@ -1,14 +1,22 @@
 #include "date.h"
 
+Date::Date() : day_(1), month_(1), year_(1) {}
+
 Date::Date(int day, int month, int year)
     : day_(day), month_(month), year_(year) {}
 
 Date::Date(const QString& date) {
-    QStringList spliteded_string = date.split('.');
+    if (!Date::CheckDate(date)) {
+        day_ = 1;
+        month_ = 1;
+        year_ = 1;
+    } else {
+        QStringList spliteded_string = date.split('.');
 
-    day_ = spliteded_string[0].toInt();
-    month_ = spliteded_string[1].toInt();
-    year_ = spliteded_string[2].toInt();
+        day_ = spliteded_string[0].toInt();
+        month_ = spliteded_string[1].toInt();
+        year_ = spliteded_string[2].toInt();
+    }
 }
 
 
@@ -26,12 +34,19 @@ int Date::GetYear() const {
     return year_;
 }
 
+QString Date::GetDate() const {
+    return QString("%1.%2.%3")
+        .arg(day_, 2, (2 * 4) + 2, QChar('0'))
+        .arg(month_, 2, (2 * 4) + 2, QChar('0'))
+        .arg(year_, 4, (2 * 4) + 2, QChar('0'));
+}
+
 bool Date::IsLeap() {
     return (year_ % 4 == 0) &&
            (!(year_ % kHundread == 0) || (year_ % 4 * kHundread == 0));
 }
 
-int Date::DayInMonth() {
+int Date::DaysInMonth() {
     if (month_ == 2 && Date::IsLeap(year_)) {
         return kFebLeapDayInMonth;
     }
@@ -49,19 +64,27 @@ int Date::DayInMonth() {
     return kLessDayInMonth;
 }
 
+int Date::DaysInYear() {
+    if (this->IsLeap()) {
+        return kDaysInYear + 1;
+    } else {
+        return kDaysInYear;
+    }
+}
+
 Date Date::NextDay() {
-    if (day_ == this->DayInMonth() && month_ == kMaxMonthInYear &&
+    if (day_ == this->DaysInMonth() && month_ == kMaxMonthInYear &&
         year_ == kMaxYear) {
         Date next(1, 1, 1);
         return next;
     }
 
-    else if (day_ == this->DayInMonth() && month_ == kMaxMonthInYear) {
+    else if (day_ == this->DaysInMonth() && month_ == kMaxMonthInYear) {
         Date next(1, 1, year_ + 1);
         return next;
     }
 
-    else if (day_ == this->DayInMonth()) {
+    else if (day_ == this->DaysInMonth()) {
         Date next(1, month_ + 1, year_);
         return next;
     }
@@ -70,6 +93,8 @@ Date Date::NextDay() {
         Date next(day_ + 1, month_, year_);
         return next;
     }
+
+    return Date(1, 1, 1);
 }
 
 Date Date::PreviousDay() {
@@ -88,7 +113,7 @@ Date Date::PreviousDay() {
 
 
     else if (day_ == 1) {
-        Date previous(Date::DayInMonth(month_ - 1, year_), month_ - 1, year_);
+        Date previous(Date::DaysInMonth(month_ - 1, year_), month_ - 1, year_);
         return previous;
     }
 
@@ -113,7 +138,7 @@ int Date::DayOfWeek() {
     int week =
         (day_ + kMaxDayInMonth * new_month / kMaxMonthInYear + new_year +
          new_year / 4 - new_year / kHundread + new_year / (4 * kHundread)) %
-        kDayInWeek;
+        kDaysInWeek;
 
     return week;
 }
@@ -124,16 +149,66 @@ int Date::DayOfYear() {
 
 
     for (int i = 1; i < month_; i++) {
-        result += Date::DayInMonth(i, year_);
+        result += Date::DaysInMonth(i, year_);
     }
 
     return result;
 }
 
+int Date::DurationToDate(Date date) {
+    int day_span = 0;
+
+    if (year_ == date.GetYear()) {
+        return date.DayOfYear() - this->DayOfYear();
+    }
+
+    bool positive = date.GetYear() > year_;
+    Date max_date = positive ? date : *this;
+    Date min_date = (!positive) ? date : *this;
+
+    day_span +=
+        max_date.DayOfYear() + (min_date.DaysInYear() - min_date.DayOfYear());
+
+    for (int year = min_date.GetYear() + 1; year < max_date.GetYear(); year++) {
+        day_span += Date::DaysInYear(year);
+    }
+
+    return day_span;
+}
+
+int Date::DurationToDay(int day, int month) {
+    int day_span = 0;
+
+
+    if (day == kMaxDayInMonth - 2 && month == 2) {
+        if (this->IsLeap() &&
+            Date::DayOfYear(day, month, this->GetYear()) > this->DayOfYear()) {
+            day_span = Date::DayOfYear(day, month, this->GetYear()) -
+                       this->DayOfYear();
+        } else {
+            day_span += this->DaysInYear() - this->DayOfYear();
+            for (int year = this->GetYear(); !Date::IsLeap(year); year++) {
+                day_span += Date::DaysInYear(year);
+            }
+            day_span += Date::DayOfYear(day, month, 4);
+        }
+    } else {
+        if (Date::DayOfYear(day, month, this->GetYear()) > this->DayOfYear()) {
+            day_span = Date::DayOfYear(day, month, this->GetYear()) -
+                       this->DayOfYear();
+        } else {
+            day_span += this->DaysInYear() - this->DayOfYear();
+            day_span += Date::DayOfYear(day, month, this->GetYear() + 1);
+        }
+    }
+
+    return day_span;
+}
+
 
 // STATIC METHODS
 bool Date::CheckDate(int day, int month, int year) {
-    if (day < 1 || day > Date::DayInMonth(month, year)) {
+    if (day < 1 || day > Date::DaysInMonth(month, year)) {
         return false;
     }
 
@@ -153,6 +228,10 @@ bool Date::CheckDate(int day, int month, int year) {
 bool Date::CheckDate(const QString& date) {
     QStringList spliteded_string = date.split('.');
 
+    if (spliteded_string.size() != 3) {
+        return false;
+    }
+
     int day = spliteded_string[0].toInt();
     int month = spliteded_string[1].toInt();
     int year = spliteded_string[2].toInt();
@@ -160,12 +239,16 @@ bool Date::CheckDate(const QString& date) {
     return Date::CheckDate(day, month, year);
 }
 
+Date Date::Now() {
+    return Date(QDateTime::currentDateTime().toString("dd.MM.yyyy"));
+}
+
 bool Date::IsLeap(int year) {
     return (year % 4 == 0) &&
            (!(year % kHundread == 0) || (year % 4 * kHundread == 0));
 }
 
-int Date::DayInMonth(int month, int year) {
+int Date::DaysInMonth(int month, int year) {
     if (month == 2 && Date::IsLeap(year)) {
         return kFebLeapDayInMonth;
     }
@@ -183,6 +266,13 @@ int Date::DayInMonth(int month, int year) {
     return kLessDayInMonth;
 }
 
+int Date::DaysInYear(int year) {
+    if (Date::IsLeap(year)) {
+        return kDaysInYear + 1;
+    } else {
+        return kDaysInYear;
+    }
+}
 
 int Date::DayOfWeek(int day, int month, int year) {
     int new_year, new_month;
@@ -199,11 +289,11 @@ int Date::DayOfWeek(int day, int month, int year) {
     int week =
         (day + kMaxDayInMonth * new_month / kMaxMonthInYear + new_year +
          new_year / 4 - new_year / kHundread + new_year / (4 * kHundread)) %
-        kDayInWeek;
+        kDaysInWeek;
 
 
     if (week == 0) {
-        return kDayInWeek;
+        return kDaysInWeek;
     }
 
     return week;
@@ -215,7 +305,7 @@ int Date::DayOfYear(int day, int month, int year) {
 
 
     for (int i = 1; i < month; i++) {
-        result += Date::DayInMonth(i, year);
+        result += Date::DaysInMonth(i, year);
     }
 
     return result;
@@ -224,6 +314,14 @@ int Date::DayOfYear(int day, int month, int year) {
 int Date::WeekOfYear(int day, int month, int year) {
     return ((Date::DayOfYear(day, month, year) + Date::DayOfWeek(1, 1, year) -
              2) /
-            kDayInWeek) +
+            kDaysInWeek) +
            1;
+}
+
+int Date::DurationToNow(Date date) {
+    return date.DurationToDate(Date::Now());
+}
+
+int Date::DurationTillBirthday(Date birthday) {
+    return Date::Now().DurationToDay(birthday.GetDay(), birthday.GetMonth());
 }
