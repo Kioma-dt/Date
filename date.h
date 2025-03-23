@@ -12,7 +12,7 @@ enum DaysOfWeek {
     kThursday,
     kFriday,
     kSaturday,
-    kSunday,
+    kSunday = 0,
 };
 
 class Date {
@@ -29,15 +29,17 @@ class Date {
     int GetYear() const;
     QString GetDate() const;
 
-    bool IsLeap();
-    int DaysInMonth();
-    int DaysInYear();
-    Date NextDay();
-    Date PreviousDay();
-    int DayOfWeek();
-    int DayOfYear();
-    int DurationToDate(Date date);
-    int DurationToDay(int day, int month);
+    bool IsLeap() const;
+    int DaysInMonth() const;
+    int DaysInYear() const;
+    Date NextDay() const;
+    Date PreviousDay() const;
+    int DayOfWeek() const;
+    QString DayOfWeekString() const;
+    int DayOfYear() const;
+    int WeekOfYear() const;
+    int DurationToDate(Date date) const;
+    int DurationToDay(int day, int month) const;
 
     static bool CheckDate(int day, int month, int year);
     static bool CheckDate(const QString& date);
