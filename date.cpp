@@ -241,6 +241,10 @@ int Date::DurationToDate(Date date) const {
 int Date::DurationToDay(int day, int month) const {
     int day_span = 0;
 
+    if (day == this->GetDay() && month == this->GetMonth()) {
+        return day_span;
+    }
+
 
     if (day == kMaxDayInMonth - 2 && month == 2) {
         if (this->IsLeap() &&
@@ -267,6 +271,9 @@ int Date::DurationToDay(int day, int month) const {
     return day_span;
 }
 
+int Date::DurationTillBirthday(Date birthday) const {
+    return this->DurationToDay(birthday.GetDay(), birthday.GetMonth());
+}
 
 // STATIC METHODS
 bool Date::CheckDate(int day, int month, int year) {
@@ -388,8 +395,4 @@ int Date::WeekOfYear(int day, int month, int year) {
 
 int Date::DurationToNow(Date date) {
     return date.DurationToDate(Date::Now());
-}
-
-int Date::DurationTillBirthday(Date birthday) {
-    return Date::Now().DurationToDay(birthday.GetDay(), birthday.GetMonth());
 }

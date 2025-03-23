@@ -26,10 +26,12 @@ QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 namespace {
 struct qt_meta_stringdata_MainWindow_t {
-    uint offsetsAndSizes[6];
+    uint offsetsAndSizes[10];
     char stringdata0[11];
     char stringdata1[9];
     char stringdata2[1];
+    char stringdata3[20];
+    char stringdata4[11];
 };
 #define QT_MOC_LITERAL(ofs, len) \
     uint(sizeof(qt_meta_stringdata_MainWindow_t::offsetsAndSizes) + ofs), len 
@@ -37,11 +39,15 @@ Q_CONSTINIT static const qt_meta_stringdata_MainWindow_t qt_meta_stringdata_Main
     {
         QT_MOC_LITERAL(0, 10),  // "MainWindow"
         QT_MOC_LITERAL(11, 8),  // "OpenFile"
-        QT_MOC_LITERAL(20, 0)   // ""
+        QT_MOC_LITERAL(20, 0),  // ""
+        QT_MOC_LITERAL(21, 19),  // "CountDaysToBirthday"
+        QT_MOC_LITERAL(41, 10)   // "ChangeDate"
     },
     "MainWindow",
     "OpenFile",
-    ""
+    "",
+    "CountDaysToBirthday",
+    "ChangeDate"
 };
 #undef QT_MOC_LITERAL
 } // unnamed namespace
@@ -52,7 +58,7 @@ Q_CONSTINIT static const uint qt_meta_data_MainWindow[] = {
       10,       // revision
        0,       // classname
        0,    0, // classinfo
-       1,   14, // methods
+       3,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -60,9 +66,13 @@ Q_CONSTINIT static const uint qt_meta_data_MainWindow[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags, initial metatype offsets
-       1,    0,   20,    2, 0x08,    1 /* Private */,
+       1,    0,   32,    2, 0x08,    1 /* Private */,
+       3,    0,   33,    2, 0x08,    2 /* Private */,
+       4,    0,   34,    2, 0x08,    3 /* Private */,
 
  // slots: parameters
+    QMetaType::Void,
+    QMetaType::Void,
     QMetaType::Void,
 
        0        // eod
@@ -78,6 +88,10 @@ Q_CONSTINIT const QMetaObject MainWindow::staticMetaObject = { {
         // Q_OBJECT / Q_GADGET
         QtPrivate::TypeAndForceComplete<MainWindow, std::true_type>,
         // method 'OpenFile'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'CountDaysToBirthday'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'ChangeDate'
         QtPrivate::TypeAndForceComplete<void, std::false_type>
     >,
     nullptr
@@ -90,6 +104,8 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         (void)_t;
         switch (_id) {
         case 0: _t->OpenFile(); break;
+        case 1: _t->CountDaysToBirthday(); break;
+        case 2: _t->ChangeDate(); break;
         default: ;
         }
     }
@@ -115,13 +131,13 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 1)
+        if (_id < 3)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 1;
+        _id -= 3;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 1)
+        if (_id < 3)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 1;
+        _id -= 3;
     }
     return _id;
 }

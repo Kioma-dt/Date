@@ -11,9 +11,15 @@ MainWindow::MainWindow(QWidget* parent)
         {"Day", "Month", "Year", "Day of Week", "Week Number", "Is Leap",
          "Next Day", "Previous Day", "To Next Date"});
     ui_->table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui_->table->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui_->table->setSelectionMode(QAbstractItemView::SingleSelection);
 
     connect(ui_->buttonOpenFile, &QPushButton::clicked, this,
             &MainWindow::OpenFile);
+    connect(ui_->buttonBirthday, &QPushButton::clicked, this,
+            &MainWindow::CountDaysToBirthday);
+    connect(ui_->buttonChangeDate, &QPushButton::clicked, this,
+            &MainWindow::ChangeDate);
 }
 
 MainWindow::~MainWindow() {
@@ -99,20 +105,19 @@ void MainWindow::AddDateToTable(const Date& date, int number,
 }
 
 void MainWindow::OpenFile() {
-    QString path;
 
-    path = QFileDialog::getOpenFileName(this, "Choose Text File",
-                                        "/home/roma/Documents/Tables",
-                                        "Text File(*.txt)");
+    path_ = QFileDialog::getOpenFileName(this, "Choose Text File",
+                                         "/home/roma/Documents/Tables",
+                                         "Text File(*.txt)");
 
-    file_ = new QFile(path);
+    QFile* file = new QFile(path_);
 
-    if (!file_->open(QIODevice::ReadWrite | QIODevice::Text)) {
+    if (!file->open(QIODevice::ReadWrite | QIODevice::Text)) {
         QMessageBox::warning(this, "File Not Open", "Failed to open file");
         return;
     }
 
-    QTextStream in(file_);
+    QTextStream in(file);
 
 
     if (dates_ != nullptr) {
@@ -133,5 +138,71 @@ void MainWindow::OpenFile() {
         }
     }
 
-    file_->close();
+    file->close();
+    delete file;
+}
+
+void MainWindow::CountDaysToBirthday() {
+    if (ui_->table->selectedItems().empty()) {
+        QMessageBox::warning(this, "Can't Find Days to Birtday",
+                             "No selected Dates");
+        return;
+    }
+
+    QTableWidgetItem* selected_item = ui_->table->selectedItems().first();
+    int selected_row = selected_item->row();
+    QString birthday = ui_->lineBirthday->text();
+    if (!Date::CheckDate(birthday)) {
+        QMessageBox::warning(this, "Can't Find Days to Birtday",
+                             "Wrong Birthday Format");
+        return;
+    }
+
+    int day_till_birthday =
+        dates_[selected_row].DurationTillBirthday(Date(birthday));
+    QMessageBox mess;
+    mess.setText("Birthday");
+    mess.setInformativeText(
+        QString("Days till your birtday: %1").arg(day_till_birthday));
+    mess.setStandardButtons(QMessageBox::Ok);
+    mess.exec();
+}
+
+void MainWindow::ChangeDate() {
+    if (ui_->table->selectedItems().empty()) {
+        QMessageBox::warning(this, "Can't Change Date", "No selected Dates");
+        return;
+    }
+
+    QTableWidgetItem* selected_item = ui_->table->selectedItems().first();
+    int selected_row = selected_item->row();
+    QString new_date_string = ui_->lineNewDate->text();
+    if (!Date::CheckDate(new_date_string)) {
+        QMessageBox::warning(this, "Can't Change Date",
+                             "Wrong New Date Format");
+        return;
+    }
+
+    QFile* file = new QFile(path_);
+    if (!file->open(QIODevice::ReadWrite | QIODevice::Text)) {
+        QMessageBox::warning(this, "File Not Open", "Failed to open file");
+        return;
+    }
+
+
+    for (int i = 0; i < selected_row; i++) {
+        file->readLine();
+    }
+    QTextStream out(file);
+    out << new_date_string;
+
+    Date new_date = Date(new_date_string);
+    dates_[selected_row] = new_date;
+
+
+    if (selected_row == n_rows_ - 1) {
+        AddDateToTable(new_date, selected_row, dates_[0]);
+    } else {
+        AddDateToTable(new_date, selected_row, dates_[selected_row + 1]);
+    }
 }

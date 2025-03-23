@@ -11,13 +11,16 @@
 
 #include <QtCore/QVariant>
 #include <QtWidgets/QApplication>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QHeaderView>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLineEdit>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QTableWidget>
-#include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
 
 QT_BEGIN_NAMESPACE
@@ -26,8 +29,17 @@ class Ui_MainWindow
 {
 public:
     QWidget *centralwidget;
-    QVBoxLayout *verticalLayout;
+    QGridLayout *gridLayout;
     QTableWidget *table;
+    QHBoxLayout *horizontalLayout;
+    QHBoxLayout *horizontalLayout_3;
+    QLabel *label;
+    QLineEdit *lineBirthday;
+    QPushButton *buttonBirthday;
+    QHBoxLayout *horizontalLayout_2;
+    QLabel *label_2;
+    QLineEdit *lineNewDate;
+    QPushButton *buttonChangeDate;
     QPushButton *buttonOpenFile;
     QMenuBar *menubar;
     QStatusBar *statusbar;
@@ -39,17 +51,67 @@ public:
         MainWindow->resize(1065, 600);
         centralwidget = new QWidget(MainWindow);
         centralwidget->setObjectName("centralwidget");
-        verticalLayout = new QVBoxLayout(centralwidget);
-        verticalLayout->setObjectName("verticalLayout");
+        gridLayout = new QGridLayout(centralwidget);
+        gridLayout->setObjectName("gridLayout");
         table = new QTableWidget(centralwidget);
         table->setObjectName("table");
 
-        verticalLayout->addWidget(table);
+        gridLayout->addWidget(table, 0, 0, 1, 1);
+
+        horizontalLayout = new QHBoxLayout();
+        horizontalLayout->setObjectName("horizontalLayout");
+        horizontalLayout_3 = new QHBoxLayout();
+        horizontalLayout_3->setObjectName("horizontalLayout_3");
+        label = new QLabel(centralwidget);
+        label->setObjectName("label");
+
+        horizontalLayout_3->addWidget(label);
+
+        lineBirthday = new QLineEdit(centralwidget);
+        lineBirthday->setObjectName("lineBirthday");
+
+        horizontalLayout_3->addWidget(lineBirthday);
+
+        buttonBirthday = new QPushButton(centralwidget);
+        buttonBirthday->setObjectName("buttonBirthday");
+
+        horizontalLayout_3->addWidget(buttonBirthday);
+
+
+        horizontalLayout->addLayout(horizontalLayout_3);
+
+        horizontalLayout_2 = new QHBoxLayout();
+        horizontalLayout_2->setObjectName("horizontalLayout_2");
+        label_2 = new QLabel(centralwidget);
+        label_2->setObjectName("label_2");
+        QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+        sizePolicy.setHorizontalStretch(0);
+        sizePolicy.setVerticalStretch(0);
+        sizePolicy.setHeightForWidth(label_2->sizePolicy().hasHeightForWidth());
+        label_2->setSizePolicy(sizePolicy);
+
+        horizontalLayout_2->addWidget(label_2);
+
+        lineNewDate = new QLineEdit(centralwidget);
+        lineNewDate->setObjectName("lineNewDate");
+
+        horizontalLayout_2->addWidget(lineNewDate);
+
+        buttonChangeDate = new QPushButton(centralwidget);
+        buttonChangeDate->setObjectName("buttonChangeDate");
+
+        horizontalLayout_2->addWidget(buttonChangeDate);
+
+
+        horizontalLayout->addLayout(horizontalLayout_2);
 
         buttonOpenFile = new QPushButton(centralwidget);
         buttonOpenFile->setObjectName("buttonOpenFile");
 
-        verticalLayout->addWidget(buttonOpenFile);
+        horizontalLayout->addWidget(buttonOpenFile);
+
+
+        gridLayout->addLayout(horizontalLayout, 1, 0, 1, 1);
 
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
@@ -68,6 +130,10 @@ public:
     void retranslateUi(QMainWindow *MainWindow)
     {
         MainWindow->setWindowTitle(QCoreApplication::translate("MainWindow", "MainWindow", nullptr));
+        label->setText(QCoreApplication::translate("MainWindow", "Your Birthday: ", nullptr));
+        buttonBirthday->setText(QCoreApplication::translate("MainWindow", "Day To Your Birtday", nullptr));
+        label_2->setText(QCoreApplication::translate("MainWindow", "New Date:", nullptr));
+        buttonChangeDate->setText(QCoreApplication::translate("MainWindow", "ChangeDate", nullptr));
         buttonOpenFile->setText(QCoreApplication::translate("MainWindow", "Open File", nullptr));
     } // retranslateUi
 

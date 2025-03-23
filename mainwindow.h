@@ -3,6 +3,7 @@
 
 #include <QFile>
 #include <QFileDialog>
+#include <QFont>
 #include <QIODevice>
 #include <QMainWindow>
 #include <QMessageBox>
@@ -12,7 +13,6 @@
 #include <QTableWidget>
 #include <QTableWidgetItem>
 #include <QTextStream>
-#include <QVBoxLayout>
 #include "date.h"
 
 QT_BEGIN_NAMESPACE
@@ -30,9 +30,9 @@ class MainWindow : public QMainWindow {
 
    private:
     Ui::MainWindow* ui_;
-    QFile* file_ = nullptr;
     Date* dates_ = nullptr;
     QTableWidget* table_ = nullptr;
+    QString path_ = "";
     int n_rows_ = 0;
     const int n_colloms_ = 9;
 
@@ -41,5 +41,7 @@ class MainWindow : public QMainWindow {
 
    private slots:
     void OpenFile();
+    void CountDaysToBirthday();
+    void ChangeDate();
 };
 #endif	// MAINWINDOW_H
