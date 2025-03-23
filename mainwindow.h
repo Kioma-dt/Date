@@ -34,10 +34,10 @@ class MainWindow : public QMainWindow {
     Date* dates_ = nullptr;
     QTableWidget* table_ = nullptr;
     int n_rows_ = 0;
-    int n_colloms_ = 3;
+    const int n_colloms_ = 9;
 
     Date* ReadDates(QTextStream& in, int& size);
-    void AddDateToTable(Date date, int number);
+    void AddDateToTable(const Date& date, int number, const Date& next_date);
 
    private slots:
     void OpenFile();

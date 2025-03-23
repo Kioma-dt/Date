@@ -5,6 +5,13 @@ MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent), ui_(new Ui::MainWindow) {
     ui_->setupUi(this);
 
+    ui_->table->setColumnCount(n_colloms_);
+    ui_->table->setRowCount(n_rows_);
+    ui_->table->setHorizontalHeaderLabels(
+        {"Day", "Month", "Year", "Day of Week", "Week Number", "Is Leap",
+         "Next Day", "Previous Day", "To Next Date"});
+    ui_->table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+
     connect(ui_->buttonOpenFile, &QPushButton::clicked, this,
             &MainWindow::OpenFile);
 }
@@ -45,8 +52,50 @@ Date* MainWindow::ReadDates(QTextStream& in, int& size) {
     return dates;
 }
 
-void MainWindow::AddDateToTable(Date date, int number) {
-    table_->setItem(number, 0, new QTableWidgetItem(date.GetDate()));
+void MainWindow::AddDateToTable(const Date& date, int number,
+                                const Date& next_date) {
+    QTableWidgetItem* item;
+
+    item = new QTableWidgetItem(QString::number(date.GetDay()));
+    item->setTextAlignment(Qt::AlignCenter);
+    ui_->table->setItem(number, 0, item);
+
+    item = new QTableWidgetItem(QString::number(date.GetMonth()));
+    item->setTextAlignment(Qt::AlignCenter);
+    ui_->table->setItem(number, 1, item);
+
+    item = new QTableWidgetItem(QString::number(date.GetYear()));
+    item->setTextAlignment(Qt::AlignCenter);
+    ui_->table->setItem(number, 2, item);
+
+    item = new QTableWidgetItem(date.DayOfWeekString());
+    item->setTextAlignment(Qt::AlignCenter);
+    ui_->table->setItem(number, 3, item);
+
+    item = new QTableWidgetItem(QString::number(date.WeekOfYear()));
+    item->setTextAlignment(Qt::AlignCenter);
+    ui_->table->setItem(number, 4, item);
+
+    if (date.IsLeap()) {
+        item = new QTableWidgetItem(QString("YES"));
+    } else {
+        item = new QTableWidgetItem(QString("NO"));
+    }
+    item->setTextAlignment(Qt::AlignCenter);
+    ui_->table->setItem(number, n_colloms_ - 4, item);
+
+    item = new QTableWidgetItem(date.NextDay().GetDate());
+    item->setTextAlignment(Qt::AlignCenter);
+    ui_->table->setItem(number, n_colloms_ - 3, item);
+
+    item = new QTableWidgetItem(date.PreviousDay().GetDate());
+    item->setTextAlignment(Qt::AlignCenter);
+    ui_->table->setItem(number, n_colloms_ - 2, item);
+
+    item =
+        new QTableWidgetItem(QString::number(date.DurationToDate(next_date)));
+    item->setTextAlignment(Qt::AlignCenter);
+    ui_->table->setItem(number, n_colloms_ - 1, item);
 }
 
 void MainWindow::OpenFile() {
@@ -72,19 +121,17 @@ void MainWindow::OpenFile() {
     }
     dates_ = ReadDates(in, n_rows_);
 
-    table_ = new QTableWidget(n_rows_, n_colloms_);
-    table_->setHorizontalHeaderLabels({"Day", "Month", "Year"});
+    ui_->table->clearContents();
+    ui_->table->setRowCount(n_rows_);
 
 
     for (int i = 0; i < n_rows_; i++) {
-        AddDateToTable(dates_[i], i);
+        if (i == n_rows_ - 1) {
+            AddDateToTable(dates_[i], i, dates_[0]);
+        } else {
+            AddDateToTable(dates_[i], i, dates_[i + 1]);
+        }
     }
-    // table_->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
-    QVBoxLayout* layout = new QVBoxLayout;
-    layout->addWidget(table_);
-    QWidget* central = new QWidget(this);
-    central->setLayout(layout);
-
-    setCentralWidget(central);
+    file_->close();
 }

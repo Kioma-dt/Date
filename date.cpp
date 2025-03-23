@@ -2,8 +2,17 @@
 
 Date::Date() : day_(1), month_(1), year_(1) {}
 
-Date::Date(int day, int month, int year)
-    : day_(day), month_(month), year_(year) {}
+Date::Date(int day, int month, int year) {
+    if (!Date::CheckDate(day, month, year)) {
+        day_ = 1;
+        month_ = 1;
+        year_ = 1;
+    } else {
+        day_ = day;
+        month_ = month;
+        year_ = year;
+    }
+}
 
 Date::Date(const QString& date) {
     if (!Date::CheckDate(date)) {
@@ -41,12 +50,12 @@ QString Date::GetDate() const {
         .arg(year_, 4, (2 * 4) + 2, QChar('0'));
 }
 
-bool Date::IsLeap() {
+bool Date::IsLeap() const {
     return (year_ % 4 == 0) &&
-           (!(year_ % kHundread == 0) || (year_ % 4 * kHundread == 0));
+           (!(year_ % kHundread == 0) || (year_ % (4 * kHundread) == 0));
 }
 
-int Date::DaysInMonth() {
+int Date::DaysInMonth() const {
     if (month_ == 2 && Date::IsLeap(year_)) {
         return kFebLeapDayInMonth;
     }
@@ -64,7 +73,7 @@ int Date::DaysInMonth() {
     return kLessDayInMonth;
 }
 
-int Date::DaysInYear() {
+int Date::DaysInYear() const {
     if (this->IsLeap()) {
         return kDaysInYear + 1;
     } else {
@@ -72,7 +81,7 @@ int Date::DaysInYear() {
     }
 }
 
-Date Date::NextDay() {
+Date Date::NextDay() const {
     if (day_ == this->DaysInMonth() && month_ == kMaxMonthInYear &&
         year_ == kMaxYear) {
         Date next(1, 1, 1);
@@ -97,7 +106,7 @@ Date Date::NextDay() {
     return Date(1, 1, 1);
 }
 
-Date Date::PreviousDay() {
+Date Date::PreviousDay() const {
 
 
     if (day_ == 1 && month_ == 1 && year_ == 1) {
@@ -107,7 +116,8 @@ Date Date::PreviousDay() {
 
 
     else if (day_ == 1 && month_ == 1) {
-        Date previous(1, kMaxDayInMonth, year_ - 1);
+        Date previous(Date::DaysInMonth(kMaxMonthInYear, year_),
+                      kMaxMonthInYear, year_ - 1);
         return previous;
     }
 
@@ -123,7 +133,7 @@ Date Date::PreviousDay() {
     }
 }
 
-int Date::DayOfWeek() {
+int Date::DayOfWeek() const {
     int new_year, new_month;
 
 
@@ -143,7 +153,48 @@ int Date::DayOfWeek() {
     return week;
 }
 
-int Date::DayOfYear() {
+QString Date::DayOfWeekString() const {
+    int day_of_week = this->DayOfWeek();
+
+
+    if (day_of_week == kMonday) {
+        return QString("Monday");
+    }
+
+
+    if (day_of_week == kTuesday) {
+        return QString("Tuesday");
+    }
+
+
+    if (day_of_week == kWednesday) {
+        return QString("Wednesday");
+    }
+
+
+    if (day_of_week == kThursday) {
+        return QString("Thursday");
+    }
+
+
+    if (day_of_week == kFriday) {
+        return QString("Friday");
+    }
+
+
+    if (day_of_week == kSaturday) {
+        return QString("Saturday");
+    }
+
+
+    if (day_of_week == kSunday) {
+        return QString("Sunday");
+    }
+
+    return QString("ERROR");
+}
+
+int Date::DayOfYear() const {
     int result = 0;
     result += day_;
 
@@ -155,11 +206,22 @@ int Date::DayOfYear() {
     return result;
 }
 
-int Date::DurationToDate(Date date) {
+int Date::WeekOfYear() const {
+    return ((Date::DayOfYear(day_, month_, year_) +
+             Date::DayOfWeek(1, 1, year_) - 2) /
+            kDaysInWeek) +
+           1;
+}
+
+int Date::DurationToDate(Date date) const {
     int day_span = 0;
 
     if (year_ == date.GetYear()) {
-        return date.DayOfYear() - this->DayOfYear();
+        bool positive = date.DayOfYear() > this->DayOfYear();
+        Date max_date = positive ? date : *this;
+        Date min_date = (!positive) ? date : *this;
+
+        return max_date.DayOfYear() - min_date.DayOfYear();
     }
 
     bool positive = date.GetYear() > year_;
@@ -176,7 +238,7 @@ int Date::DurationToDate(Date date) {
     return day_span;
 }
 
-int Date::DurationToDay(int day, int month) {
+int Date::DurationToDay(int day, int month) const {
     int day_span = 0;
 
 
@@ -232,11 +294,17 @@ bool Date::CheckDate(const QString& date) {
         return false;
     }
 
-    int day = spliteded_string[0].toInt();
-    int month = spliteded_string[1].toInt();
-    int year = spliteded_string[2].toInt();
+    bool day_ok = false, month_ok = false, year_ok = false;
+    int day = spliteded_string[0].toInt(&day_ok);
+    int month = spliteded_string[1].toInt(&month_ok);
+    int year = spliteded_string[2].toInt(&year_ok);
 
-    return Date::CheckDate(day, month, year);
+
+    if (day_ok && month_ok && year_ok) {
+        return Date::CheckDate(day, month, year);
+    } else {
+        return false;
+    }
 }
 
 Date Date::Now() {
