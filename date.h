@@ -40,6 +40,7 @@ class Date {
     int WeekOfYear() const;
     int DurationToDate(Date date) const;
     int DurationToDay(int day, int month) const;
+    int DurationTillBirthday(Date birthday) const;
 
     static bool CheckDate(int day, int month, int year);
     static bool CheckDate(const QString& date);
@@ -51,7 +52,6 @@ class Date {
     static int DayOfYear(int day, int month, int year);
     static int WeekOfYear(int day, int month, int year);
     static int DurationToNow(Date date);
-    static int DurationTillBirthday(Date birthday);
 
 
    private:
