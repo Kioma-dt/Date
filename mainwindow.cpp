@@ -20,6 +20,8 @@ MainWindow::MainWindow(QWidget* parent)
             &MainWindow::CountDaysToBirthday);
     connect(ui_->buttonChangeDate, &QPushButton::clicked, this,
             &MainWindow::ChangeDate);
+    connect(ui_->buttonAddDate, &QPushButton::clicked, this,
+            &MainWindow::AddDate);
 }
 
 MainWindow::~MainWindow() {
@@ -33,15 +35,22 @@ Date* MainWindow::ReadDates(QTextStream& in, int& size) {
     while (!in.atEnd()) {
         size++;
         QString temp_str = in.readLine();
-        if (!Date::CheckDate(temp_str)) {
+        Date new_date;
+
+        try {
+            new_date = Date(temp_str);
+        }
+
+
+        catch (...) {
             QMessageBox::warning(
                 this, "Frong Date",
                 QString(
                     "Frong Date Format. Date №%1 Will Be Standart (01.01.0001)")
                     .arg(size));
+            new_date = Date();
         }
 
-        Date new_date(temp_str);
         Date* temp_dates = new Date[size];
 
 
@@ -104,6 +113,22 @@ void MainWindow::AddDateToTable(const Date& date, int number,
     ui_->table->setItem(number, n_colloms_ - 1, item);
 }
 
+void MainWindow::ChangeDurationToNext() {
+
+
+    for (int i = 0; i < n_rows_ - 1; i++) {
+        QTableWidgetItem* item = new QTableWidgetItem(
+            QString::number(dates_[i].DurationToDate(dates_[i + 1])));
+        item->setTextAlignment(Qt::AlignCenter);
+        ui_->table->setItem(i, n_colloms_ - 1, item);
+    }
+
+    QTableWidgetItem* item = new QTableWidgetItem(
+        QString::number(dates_[n_rows_ - 1].DurationToDate(dates_[0])));
+    item->setTextAlignment(Qt::AlignCenter);
+    ui_->table->setItem(n_rows_ - 1, n_colloms_ - 1, item);
+}
+
 void MainWindow::OpenFile() {
 
     path_ = QFileDialog::getOpenFileName(this, "Choose Text File",
@@ -143,29 +168,23 @@ void MainWindow::OpenFile() {
 }
 
 void MainWindow::CountDaysToBirthday() {
-    if (ui_->table->selectedItems().empty()) {
-        QMessageBox::warning(this, "Can't Find Days to Birtday",
-                             "No selected Dates");
-        return;
+    QString birthday = ui_->lineBirthday->text();
+
+    try {
+        int day_till_birthday = Date::DurationToBirthday(Date(birthday));
+        QMessageBox mess;
+        mess.setText("Birthday");
+        mess.setInformativeText(
+            QString("Days till your birtday: %1").arg(day_till_birthday));
+        mess.setStandardButtons(QMessageBox::Ok);
+        mess.exec();
     }
 
-    QTableWidgetItem* selected_item = ui_->table->selectedItems().first();
-    int selected_row = selected_item->row();
-    QString birthday = ui_->lineBirthday->text();
-    if (!Date::CheckDate(birthday)) {
+
+    catch (...) {
         QMessageBox::warning(this, "Can't Find Days to Birtday",
                              "Wrong Birthday Format");
-        return;
     }
-
-    int day_till_birthday =
-        dates_[selected_row].DurationTillBirthday(Date(birthday));
-    QMessageBox mess;
-    mess.setText("Birthday");
-    mess.setInformativeText(
-        QString("Days till your birtday: %1").arg(day_till_birthday));
-    mess.setStandardButtons(QMessageBox::Ok);
-    mess.exec();
 }
 
 void MainWindow::ChangeDate() {
@@ -174,35 +193,85 @@ void MainWindow::ChangeDate() {
         return;
     }
 
-    QTableWidgetItem* selected_item = ui_->table->selectedItems().first();
-    int selected_row = selected_item->row();
+    int selected_row = ui_->table->currentRow();
     QString new_date_string = ui_->lineNewDate->text();
-    if (!Date::CheckDate(new_date_string)) {
+
+    try {
+        Date new_date = Date(new_date_string);
+        dates_[selected_row] = new_date;
+
+        QFile* file = new QFile(path_);
+        if (!file->open(QIODevice::ReadWrite | QIODevice::Text)) {
+            QMessageBox::warning(this, "File Not Open", "Failed to open file");
+            return;
+        }
+
+
+        for (int i = 0; i < selected_row; i++) {
+            file->readLine();
+        }
+        QTextStream out(file);
+        out << new_date_string;
+
+
+        if (selected_row == n_rows_ - 1) {
+            AddDateToTable(new_date, selected_row, dates_[0]);
+        } else {
+            AddDateToTable(new_date, selected_row, dates_[selected_row + 1]);
+        }
+        ChangeDurationToNext();
+    }
+
+
+    catch (...) {
         QMessageBox::warning(this, "Can't Change Date",
                              "Wrong New Date Format");
+    }
+}
+
+void MainWindow::AddDate() {
+
+
+    if (path_ == "") {
+        QMessageBox::warning(this, "Can't add Date", "No Open File");
         return;
     }
+    QString new_date_string = ui_->lineNewDate->text();
 
-    QFile* file = new QFile(path_);
-    if (!file->open(QIODevice::ReadWrite | QIODevice::Text)) {
-        QMessageBox::warning(this, "File Not Open", "Failed to open file");
-        return;
+    try {
+        Date new_date = Date(new_date_string);
+
+        QFile* file = new QFile(path_);
+        if (!file->open(QIODevice::ReadWrite | QIODevice::Text)) {
+            QMessageBox::warning(this, "File Not Open", "Failed to open file");
+            return;
+        }
+
+
+        file->readAll();
+        QTextStream out(file);
+        out << new_date_string << '\n';
+
+        n_rows_++;
+        Date* temp_dates = new Date[n_rows_];
+
+
+        for (int i = 0; i < n_rows_ - 1; i++) {
+            temp_dates[i] = dates_[i];
+        }
+        temp_dates[n_rows_ - 1] = new_date;
+
+        delete[] dates_;
+        dates_ = temp_dates;
+        temp_dates = nullptr;
+
+        ui_->table->setRowCount(n_rows_);
+        AddDateToTable(new_date, n_rows_ - 1, dates_[0]);
+        ChangeDurationToNext();
     }
 
 
-    for (int i = 0; i < selected_row; i++) {
-        file->readLine();
-    }
-    QTextStream out(file);
-    out << new_date_string;
-
-    Date new_date = Date(new_date_string);
-    dates_[selected_row] = new_date;
-
-
-    if (selected_row == n_rows_ - 1) {
-        AddDateToTable(new_date, selected_row, dates_[0]);
-    } else {
-        AddDateToTable(new_date, selected_row, dates_[selected_row + 1]);
+    catch (...) {
+        QMessageBox::warning(this, "Can't Add Date", "Wrong New Date Format");
     }
 }

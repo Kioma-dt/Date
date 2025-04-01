@@ -51,7 +51,7 @@ class Date {
     static int DayOfWeek(int day, int month, int year);
     static int DayOfYear(int day, int month, int year);
     static int WeekOfYear(int day, int month, int year);
-    static int DurationToNow(Date date);
+    static int DurationToBirthday(Date burthday);
 
 
    private:

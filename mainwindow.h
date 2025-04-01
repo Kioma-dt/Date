@@ -38,10 +38,12 @@ class MainWindow : public QMainWindow {
 
     Date* ReadDates(QTextStream& in, int& size);
     void AddDateToTable(const Date& date, int number, const Date& next_date);
+    void ChangeDurationToNext();
 
    private slots:
     void OpenFile();
     void CountDaysToBirthday();
     void ChangeDate();
+    void AddDate();
 };
 #endif	// MAINWINDOW_H
