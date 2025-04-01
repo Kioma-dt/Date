@@ -3,29 +3,32 @@
 Date::Date() : day_(1), month_(1), year_(1) {}
 
 Date::Date(int day, int month, int year) {
+    day_ = 1;
+    month_ = 1;
+    year_ = 1;
+
     if (!Date::CheckDate(day, month, year)) {
-        day_ = 1;
-        month_ = 1;
-        year_ = 1;
-    } else {
-        day_ = day;
-        month_ = month;
-        year_ = year;
+        throw "Wrong Date Format";
     }
+
+    day_ = day;
+    month_ = month;
+    year_ = year;
 }
 
 Date::Date(const QString& date) {
-    if (!Date::CheckDate(date)) {
-        day_ = 1;
-        month_ = 1;
-        year_ = 1;
-    } else {
-        QStringList spliteded_string = date.split('.');
+    day_ = 1;
+    month_ = 1;
+    year_ = 1;
 
-        day_ = spliteded_string[0].toInt();
-        month_ = spliteded_string[1].toInt();
-        year_ = spliteded_string[2].toInt();
+    if (!Date::CheckDate(date)) {
+        throw "Wrong Date Format";
     }
+    QStringList spliteded_string = date.split('.');
+
+    day_ = spliteded_string[0].toInt();
+    month_ = spliteded_string[1].toInt();
+    year_ = spliteded_string[2].toInt();
 }
 
 
@@ -45,9 +48,9 @@ int Date::GetYear() const {
 
 QString Date::GetDate() const {
     return QString("%1.%2.%3")
-        .arg(day_, 2, (2 * 4) + 2, QChar('0'))
-        .arg(month_, 2, (2 * 4) + 2, QChar('0'))
-        .arg(year_, 4, (2 * 4) + 2, QChar('0'));
+        .arg(day_, 2, kTen, QChar('0'))
+        .arg(month_, 2, kTen, QChar('0'))
+        .arg(year_, 4, kTen, QChar('0'));
 }
 
 bool Date::IsLeap() const {
@@ -239,6 +242,10 @@ int Date::DurationToDate(Date date) const {
 }
 
 int Date::DurationToDay(int day, int month) const {
+    if (!Date::CheckDate(day, month, 1)) {
+        throw "Frong Date Format";
+    }
+
     int day_span = 0;
 
     if (day == this->GetDay() && month == this->GetMonth()) {
@@ -253,7 +260,7 @@ int Date::DurationToDay(int day, int month) const {
                        this->DayOfYear();
         } else {
             day_span += this->DaysInYear() - this->DayOfYear();
-            for (int year = this->GetYear(); !Date::IsLeap(year); year++) {
+            for (int year = this->GetYear() + 1; !Date::IsLeap(year); year++) {
                 day_span += Date::DaysInYear(year);
             }
             day_span += Date::DayOfYear(day, month, 4);
@@ -319,6 +326,10 @@ Date Date::Now() {
 }
 
 bool Date::IsLeap(int year) {
+    if (!Date::CheckDate(1, 1, year)) {
+        throw "Frong Date Format";
+    }
+
     return (year % 4 == 0) &&
            (!(year % kHundread == 0) || (year % 4 * kHundread == 0));
 }
@@ -342,6 +353,10 @@ int Date::DaysInMonth(int month, int year) {
 }
 
 int Date::DaysInYear(int year) {
+    if (!Date::CheckDate(1, 1, year)) {
+        throw "Frong Date Format";
+    }
+
     if (Date::IsLeap(year)) {
         return kDaysInYear + 1;
     } else {
@@ -350,6 +365,10 @@ int Date::DaysInYear(int year) {
 }
 
 int Date::DayOfWeek(int day, int month, int year) {
+    if (!Date::CheckDate(day, month, year)) {
+        throw "Frong Date Format";
+    }
+
     int new_year, new_month;
 
 
@@ -375,6 +394,10 @@ int Date::DayOfWeek(int day, int month, int year) {
 }
 
 int Date::DayOfYear(int day, int month, int year) {
+    if (!Date::CheckDate(day, month, year)) {
+        throw "Frong Date Format";
+    }
+
     int result = 0;
     result += day;
 
@@ -387,12 +410,16 @@ int Date::DayOfYear(int day, int month, int year) {
 }
 
 int Date::WeekOfYear(int day, int month, int year) {
+    if (!Date::CheckDate(day, month, year)) {
+        throw "Frong Date Format";
+    }
+
     return ((Date::DayOfYear(day, month, year) + Date::DayOfWeek(1, 1, year) -
              2) /
             kDaysInWeek) +
            1;
 }
 
-int Date::DurationToNow(Date date) {
-    return date.DurationToDate(Date::Now());
+int Date::DurationToBirthday(Date burthday) {
+    return Date::Now().DurationToDay(burthday.GetDay(), burthday.GetMonth());
 }

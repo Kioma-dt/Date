@@ -40,6 +40,7 @@ public:
     QLabel *label_2;
     QLineEdit *lineNewDate;
     QPushButton *buttonChangeDate;
+    QPushButton *buttonAddDate;
     QPushButton *buttonOpenFile;
     QMenuBar *menubar;
     QStatusBar *statusbar;
@@ -102,6 +103,11 @@ public:
 
         horizontalLayout_2->addWidget(buttonChangeDate);
 
+        buttonAddDate = new QPushButton(centralwidget);
+        buttonAddDate->setObjectName("buttonAddDate");
+
+        horizontalLayout_2->addWidget(buttonAddDate);
+
 
         horizontalLayout->addLayout(horizontalLayout_2);
 
@@ -134,6 +140,7 @@ public:
         buttonBirthday->setText(QCoreApplication::translate("MainWindow", "Day To Your Birtday", nullptr));
         label_2->setText(QCoreApplication::translate("MainWindow", "New Date:", nullptr));
         buttonChangeDate->setText(QCoreApplication::translate("MainWindow", "ChangeDate", nullptr));
+        buttonAddDate->setText(QCoreApplication::translate("MainWindow", "Add Date", nullptr));
         buttonOpenFile->setText(QCoreApplication::translate("MainWindow", "Open File", nullptr));
     } // retranslateUi
 
